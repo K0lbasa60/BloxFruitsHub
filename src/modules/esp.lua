@@ -96,7 +96,7 @@ function ESPModule.StartChestCollectLoop()
                                         end
                                     end
                                     task.wait(0.05)
-                                until not part.Parent or (tick() - start) > 1ы
+                                until not part.Parent or (tick() - start) > 1
                             end
                         end
                     end
