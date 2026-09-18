@@ -1,19 +1,17 @@
 local BASE_URL = "https://raw.githubusercontent.com/K0lbasa60/BloxFruitsHub/main/src/"
 
 local function safeLoad(path)
-    local url = BASE_URL .. path
-    local success, content = pcall(function()
-        return game:HttpGet(url)
-    end)
-
-    if not success or not content or content:find("404") then
-        warn("[BloxFruitsHub Error]: Не удалось загрузить файл -> " .. path .. " (Проверь путь на GitHub!)")
+    local url = BASE_URL .. path .. "?v=" .. tostring(tick()) -- обход кэша GitHub
+    local success, content = pcall(function() return game:HttpGet(url) end)
+    
+    if not success or not content or content:find("404: Not Found") then
+        warn("[BloxFruitsHub]: Ошибка 404! Проверь путь к файлу на GitHub: " .. path)
         return nil
     end
 
     local func, err = loadstring(content)
     if not func then
-        warn("[BloxFruitsHub Error]: Ошибка синтаксиса в " .. path .. " -> " .. tostring(err))
+        warn("[BloxFruitsHub]: Ошибка синтаксиса в файле " .. path .. ": " .. tostring(err))
         return nil
     end
 
@@ -29,7 +27,7 @@ local AutoFarmModule = safeLoad("modules/autofarm.lua")
 local StatsModule = safeLoad("modules/stats.lua")
 local UIModule = safeLoad("ui.lua")
 
--- Запуск систем при успешной загрузке
+-- Запуск систем
 if UIModule and ESPModule then
     UIModule.Create(ESPModule)
 end
@@ -37,5 +35,3 @@ end
 if AutoFarmModule then AutoFarmModule.StartLoop() end
 if StatsModule then StatsModule.StartLoop() end
 if ESPModule and ESPModule.StartChestCollectLoop then ESPModule.StartChestCollectLoop() end
-
-print("[BloxFruitsHub]: Загрузка завершена!")
