@@ -2,7 +2,7 @@
 -- INIT.LUA (Главный стартовый файл)
 -- ==========================================
 
-local BASE_URL = "https://raw.githubusercontent.com/ТВОЙ_НИК/ТВОЙ_РЕПОЗИТОРИЙ/main/src/"
+local BASE_URL = "https://raw.githubusercontent.com/K0lbasa60/BloxFruitsHub/main/src/"
 
 -- Загрузка конфига
 loadstring(game:HttpGet(BASE_URL .. "config.lua"))()
