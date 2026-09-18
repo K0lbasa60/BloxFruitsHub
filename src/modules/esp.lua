@@ -32,7 +32,7 @@ function ESPModule.UpdateChestESP(enabled)
     end)
 end
 
--- Фикс сбора фрукта: удерживает позицию и имитирует касание
+-- Сбор фрукта с удержанием позиции
 function ESPModule.SearchAndCollectFruit()
     local char = LocalPlayer.Character
     if not char or not char:FindFirstChild("HumanoidRootPart") then return false end
@@ -42,13 +42,11 @@ function ESPModule.SearchAndCollectFruit()
             local handle = obj:FindFirstChild("Handle") or obj:FindFirstChildOfClass("BasePart") or obj.PrimaryPart
             if handle then
                 local startTime = tick()
-                -- Удерживаем персонажа на фрукте до 2.5 секунд или пока фрукт не пропадет с земли
                 repeat
                     if char and char:FindFirstChild("HumanoidRootPart") and handle and handle.Parent then
                         char.HumanoidRootPart.CFrame = handle.CFrame
                         char.HumanoidRootPart.AssemblyLinearVelocity = Vector3.zero
                         
-                        -- Вызов функции касания (если поддерживается инжектором)
                         if firetouchinterest then
                             firetouchinterest(char.HumanoidRootPart, handle, 0)
                             task.wait(0.05)
@@ -66,11 +64,11 @@ function ESPModule.SearchAndCollectFruit()
     return false
 end
 
--- Новая функция: Авто-сбор сундуков по всей карте
+-- Авто-сбор сундуков по всей карте
 function ESPModule.StartChestCollectLoop()
     task.spawn(function()
         while task.wait(0.2) do
-            if getgenv().Config.AutoCollectChests then
+            if getgenv().Config and getgenv().Config.AutoCollectChests then
                 pcall(function()
                     local char = LocalPlayer.Character
                     if not char or not char:FindFirstChild("HumanoidRootPart") then return end
@@ -82,8 +80,7 @@ function ESPModule.StartChestCollectLoop()
                             local part = obj:IsA("BasePart") and obj or obj:FindFirstChildOfClass("BasePart") or obj.PrimaryPart
                             
                             if part and part.Parent then
-                                local start = tick()
-                                -- Телепорт к сундуку и ожидание получения награды (до 1 секунды)
+                                local startTime = tick()
                                 repeat
                                     if char and char:FindFirstChild("HumanoidRootPart") and part and part.Parent then
                                         char.HumanoidRootPart.CFrame = part.CFrame
@@ -96,7 +93,7 @@ function ESPModule.StartChestCollectLoop()
                                         end
                                     end
                                     task.wait(0.05)
-                                until not part.Parent or (tick() - start) > 1
+                                until not part.Parent or (tick() - startTime) > 1
                             end
                         end
                     end
