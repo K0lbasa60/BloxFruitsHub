@@ -5,17 +5,33 @@ local LocalPlayer = Players.LocalPlayer
 
 local AutoFarmModule = {}
 
+-- Автоматическое взятие оружия в руки
+local function equipTool()
+    local char = LocalPlayer.Character
+    if not char then return end
+    if not char:FindFirstChildOfClass("Tool") then
+        local backpack = LocalPlayer:FindFirstChild("Backpack")
+        if backpack then
+            local tool = backpack:FindFirstChildOfClass("Tool")
+            if tool then
+                char.Humanoid:EquipTool(tool)
+            end
+        end
+    end
+end
+
 function AutoFarmModule.StartLoop()
     task.spawn(function()
-        while task.wait(0.03) do
+        while task.wait(0.05) do
             if getgenv().Config.AutoFarm then
                 pcall(function()
                     local char = LocalPlayer.Character
                     if char and char:FindFirstChild("HumanoidRootPart") and char:FindFirstChild("Humanoid") and char.Humanoid.Health > 0 then
                         
-                        -- Фиксация скорости (чтобы персонаж не падал и не получал урон)
+                        -- Сброс падения
                         char.HumanoidRootPart.AssemblyLinearVelocity = Vector3.zero
-                        
+                        equipTool()
+
                         local enemies = Workspace:FindFirstChild("Enemies")
                         if enemies then
                             for _, enemy in pairs(enemies:GetChildren()) do
@@ -23,18 +39,21 @@ function AutoFarmModule.StartLoop()
                                 local hum = enemy:FindFirstChild("Humanoid")
                                 
                                 if hrp and hum and hum.Health > 0 then
-                                    local dist = getgenv().Config.FarmDistance or 9
-                                    -- Безопасная точка над мобом с углом атаки вниз
-                                    char.HumanoidRootPart.CFrame = hrp.CFrame * CFrame.new(0, dist, 0) * CFrame.Angles(math.rad(-90), 0, 0)
+                                    local dist = getgenv().Config.FarmDistance or 8
                                     
-                                    -- Отключение коллизий
+                                    -- Безопасное зависание ПРЯМО НАД мобом (без поломки углов)
+                                    char.HumanoidRootPart.CFrame = hrp.CFrame * CFrame.new(0, dist, 0)
+                                    
+                                    -- Отключение коллизий (NoClip)
                                     for _, part in pairs(char:GetChildren()) do
                                         if part:IsA("BasePart") then part.CanCollide = false end
                                     end
                                     
-                                    -- Удар
+                                    -- Атака
                                     VirtualUser:CaptureController()
-                                    VirtualUser:ClickButton1(Vector2.new(850, 520))
+                                    VirtualUser:Button1Down(Vector2.zero)
+                                    task.wait(0.01)
+                                    VirtualUser:Button1Up(Vector2.zero)
                                     break
                                 end
                             end
@@ -46,5 +65,5 @@ function AutoFarmModule.StartLoop()
     end)
 end
 
-print("[BloxFruitsHub]: AutoFarm Модуль обновлен!")
+print("[BloxFruitsHub]: AutoFarm Модуль исправлен!")
 return AutoFarmModule
